@@ -1,0 +1,4 @@
+---
+- name: Install gpushare-schd-extender
+  hosts: control_plane
+  tasks: []

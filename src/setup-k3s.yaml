@@ -1,0 +1,60 @@
+---
+- name: Install gpushare-schd-extender
+  hosts: control_plane
+  tasks:
+    - name: Apply gpushare-schd-extender resources
+      args:
+        executable: /bin/bash
+        chdir: "{{ playbook_dir }}"
+      environment:
+        PATH: "{{ lookup('env', 'PATH') }}"
+      become: true
+      ansible.builtin.shell: |
+        kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml apply -f gpushare-schd-extender.yaml
+
+    - name: mkdir /var/lib/rancher/k3s/manifests if not exists
+      become: true
+      ansible.builtin.file:
+        path: /var/lib/rancher/k3s/manifests
+        state: directory
+
+    # Assuming Kubernetes v1.23+
+    # See https://github.com/AliyunContainerService/gpushare-scheduler-extender/blob/master/docs/install.md
+    - name: Copy scheduler policy config file into /var/lib/rancher/k3s/manifests
+      become: true
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/scheduler-policy-config.yaml"
+        dest: /var/lib/rancher/k3s/manifests/scheduler-policy-config.yaml
+        owner: root
+          
+    # - name: Copy kube-scheduler config override file into /var/lib/rancher/k3s/manifests
+    #   become: true
+    #   ansible.builtin.copy:
+    #     src: "{{ playbook_dir }}/kube-apiserver-config-k3s.yaml"
+    #     dest: /var/lib/rancher/k3s/manifests/kube-apiserver-config-override.yaml
+    #     owner: root
+
+    - name: Add kube-scheduler args into k3s.service.env
+      become: true
+      ansible.builtin.lineinfile:
+        line: "--kube-scheduler-arg config=/var/lib/rancher/k3s/manifests/scheduler-policy-config.yaml"
+        path: /etc/systemd/system/k3s.service.env
+        create: true
+
+    - name: Restart systemd k3s.service
+      become: true
+      ansible.builtin.systemd_service:
+        state: restarted
+        daemon_reload: true
+        name: k3s
+
+    - name: Label all nodes to gpushare true
+      args:
+        executable: /bin/bash
+        chdir: "{{ playbook_dir }}"
+      environment:
+        PATH: "{{ lookup('env', 'PATH') }}"
+      become: true
+      ansible.builtin.shell: |
+        kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml label node --all gpushare=true
+

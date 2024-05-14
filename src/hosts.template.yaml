@@ -1,0 +1,10 @@
+control_plane:
+  hosts:
+    localhost:
+      ansible_host: 127.0.0.1
+      ansible_port: 22
+      ansible_user: dps0340
+      ansible_become: true
+      ansible_become_user: root
+      ansible_become_password:
+      ansible_password:
