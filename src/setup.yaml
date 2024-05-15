@@ -1,4 +1,58 @@
 ---
 - name: Install gpushare-schd-extender
   hosts: control_plane
-  tasks: []
+  tasks:
+    - name: Apply gpushare-schd-extender resources
+      args:
+        executable: /bin/bash
+        chdir: "{{ playbook_dir }}"
+      environment:
+        PATH: "{{ lookup('env', 'PATH') }}"
+      ansible.builtin.shell: |
+        kubectl apply -f gpushare-schd-extender.yaml
+
+    - name: mkdir /etc/kubernetes/manifests if not exists
+      become: true
+      ansible.builtin.file:
+        path: /etc/kubernetes/manifests
+        state: directory
+
+    # Assuming Kubernetes v1.23+
+    # See https://github.com/AliyunContainerService/gpushare-scheduler-extender/blob/master/docs/install.md
+    - name: Copy scheduler policy config file into /etc/kubernetes
+      become: true
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/scheduler-policy-config.yaml"
+        dest: /etc/kubernetes/scheduler-policy-config.yaml
+        owner: root
+          
+    - name: Make backup folder
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/../backups"
+        state: directory
+
+    - name: Backup kube-scheduler file located at /etc/kubernetes/manifests
+      become: true
+      args:
+        executable: /bin/bash
+        chdir: "{{ playbook_dir }}/../backups/"
+      ansible.builtin.shell: |
+        DATETIME="$(date '+%Y-%m-%d-%H-%M-%S')"
+        sudo cp /etc/kubernetes/manifests/kube-scheduler.yaml ./kube-scheduler.$DATETIME.backup.yaml
+
+    - name: Copy patched kube-scheduler file into /etc/kubernetes/manifests
+      become: true
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/kube-scheduler.yaml"
+        dest: /etc/kubernetes/manifests/kube-scheduler.yaml
+        owner: root
+
+    - name: Label all nodes to gpushare true
+      args:
+        executable: /bin/bash
+        chdir: "{{ playbook_dir }}"
+      environment:
+        PATH: "{{ lookup('env', 'PATH') }}"
+      ansible.builtin.shell: |
+        kubectl label node --all gpushare=true
+

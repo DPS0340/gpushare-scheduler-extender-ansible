@@ -27,19 +27,19 @@
         dest: /var/lib/rancher/k3s/manifests/scheduler-policy-config.yaml
         owner: root
           
-    # - name: Copy kube-scheduler config override file into /var/lib/rancher/k3s/manifests
-    #   become: true
-    #   ansible.builtin.copy:
-    #     src: "{{ playbook_dir }}/kube-apiserver-config-k3s.yaml"
-    #     dest: /var/lib/rancher/k3s/manifests/kube-apiserver-config-override.yaml
-    #     owner: root
-
-    - name: Add kube-scheduler args into k3s.service.env
+    - name: Copy kube-scheduler config override file into /var/lib/rancher/k3s/manifests
       become: true
-      ansible.builtin.lineinfile:
-        line: "--kube-scheduler-arg config=/var/lib/rancher/k3s/manifests/scheduler-policy-config.yaml"
-        path: /etc/systemd/system/k3s.service.env
-        create: true
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/kube-apiserver-config-k3s.yaml"
+        dest: /var/lib/rancher/k3s/manifests/kube-apiserver-config-override.yaml
+        owner: root
+
+    # - name: Add kube-scheduler args into k3s.service.env
+    #   become: true
+    #   ansible.builtin.lineinfile:
+    #     line: "--kube-scheduler-arg config=/var/lib/rancher/k3s/manifests/scheduler-policy-config.yaml"
+    #     path: /etc/systemd/system/k3s.service.env
+    #     create: true
 
     - name: Restart systemd k3s.service
       become: true
