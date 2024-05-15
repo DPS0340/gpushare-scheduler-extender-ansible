@@ -47,6 +47,16 @@
         dest: /etc/kubernetes/manifests/kube-scheduler.yaml
         owner: root
 
+    - name: Delete gpu-operator operator, device plugin
+      args:
+        executable: /bin/bash
+        chdir: "{{ playbook_dir }}"
+      environment:
+        PATH: "{{ lookup('env', 'PATH') }}"
+      ansible.builtin.shell: |
+        kubectl delete -n gpu-operator deploy/gpu-operator
+        kubectl delete -n gpu-operator nvidia-device-plugin-daemonset
+
     # See https://github.com/AliyunContainerService/gpushare-scheduler-extender/blob/master/docs/install.md#3-deploy-device-plugin
     - name: Deploy gpushare device plugin
       args:
