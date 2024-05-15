@@ -47,6 +47,17 @@
         dest: /etc/kubernetes/manifests/kube-scheduler.yaml
         owner: root
 
+    # See https://github.com/AliyunContainerService/gpushare-scheduler-extender/blob/master/docs/install.md#3-deploy-device-plugin
+    - name: Deploy gpushare device plugin
+      args:
+        executable: /bin/bash
+        chdir: "{{ playbook_dir }}"
+      environment:
+        PATH: "{{ lookup('env', 'PATH') }}"
+      ansible.builtin.shell: |
+        kubectl apply -f device-plugin-rbac.yaml
+        kubectl apply -f device-plugin-ds.yaml
+
     - name: Label all nodes to gpushare true
       args:
         executable: /bin/bash
