@@ -1,5 +1,5 @@
 # Original code from https://github.com/AliyunContainerService/gpushare-scheduler-extender/blob/master/docs/userguide.md
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: StatefulSet
 
 metadata:
