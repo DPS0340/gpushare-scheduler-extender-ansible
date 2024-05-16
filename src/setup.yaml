@@ -54,8 +54,10 @@
       environment:
         PATH: "{{ lookup('env', 'PATH') }}"
       ansible.builtin.shell: |
+        set +e
         kubectl delete -n gpu-operator deploy/gpu-operator
         kubectl delete -n gpu-operator nvidia-device-plugin-daemonset
+        exit 0
 
     # See https://github.com/AliyunContainerService/gpushare-scheduler-extender/blob/master/docs/install.md#3-deploy-device-plugin
     - name: Deploy gpushare device plugin
