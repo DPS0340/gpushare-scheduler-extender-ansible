@@ -30,7 +30,7 @@ spec:
           - gpushare-device-plugin-v2
           - -logtostderr
           - --v=5
-          - --memory-unit=GiB
+          - --memory-unit=MiB
         resources:
           limits:
             memory: "300Mi"

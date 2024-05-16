@@ -26,5 +26,5 @@ spec:
         image: cheyang/gpu-player:v2
         resources:
           limits:
-            # GiB
+            # MiB
             aliyun.com/gpu-mem: 3
