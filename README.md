@@ -1,8 +1,8 @@
-# gpushare-scheduler-extender-practice 
+# gpushare-scheduler-extender-ansible
 
 ## Motivation
 
-VRAM 단위의 Fractional GPU를 써보자 ㅎㅎ
+Let's use VRAM-wise Fractional GPU
 
 ## Original Repo
 
